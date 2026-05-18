@@ -24,9 +24,11 @@ cat > /usr/local/bin/tailscale-aliyun-route.sh << 'SCRIPT'
 #!/bin/bash
 # 阿里云关键内网 IP（按需增删）
 ALIYUN_IPS=(
-  100.100.100.100/32  # 实例元数据
+  100.100.100.200/32  # 实例元数据
+  100.100.100.100/32  # 备用元数据
   100.100.2.136/32    # 内网 YUM 源
   100.100.2.138/32    # 内网 YUM 源
+  100.100.2.148/32    # 内网镜像源
 )
 
 PRIORITY=5200
@@ -67,11 +69,11 @@ echo ""
 echo "策略路由规则:"
 ip rule list | grep -E "520[0-9]" || echo "  (无规则，可能阿里云内网 IP 段无冲突)"
 echo ""
-echo "100.100.100.100 路由走向:"
-ip route get 100.100.100.100 2>/dev/null || echo "  (查询失败)"
+echo "100.100.100.200 路由走向:"
+ip route get 100.100.100.200 2>/dev/null || echo "  (查询失败)"
 echo ""
 echo "元数据服务测试:"
-META_RESP=$(curl -s --connect-timeout 3 http://100.100.100.100/latest/meta-data/instance-id 2>/dev/null)
+META_RESP=$(curl -s --connect-timeout 3 http://100.100.100.200/latest/meta-data/instance-id 2>/dev/null)
 if [[ "$META_RESP" == i-* ]]; then
   echo "  成功! 实例 ID: $META_RESP"
 else
